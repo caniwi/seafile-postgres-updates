@@ -1,0 +1,186 @@
+5.1-6.0-PostgreSQLUpdate
+
+SEAHUB_DB
+
+ALTER TABLE api2_tokenv2 ADD COLUMN wiped_at timestamp without time zone;
+alter table api2_tokenv2 alter column last_accessed type timestamp without time zone;
+ALTER TABLE api2_tokenv2 ADD COLUMN created_at timestamp without time zone NOT NULL DEFAULT '1970-01-01 00:00:00';
+
+CREATE SEQUENCE base_filecomment_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+CREATE TABLE base_filecomment (
+    id integer DEFAULT nextval('base_filecomment_id_seq'::regclass) NOT NULL,
+    repo_id character varying(36) NOT NULL,
+    parent_path text NOT NULL,
+    repo_id_parent_path_md5 character varying(100) NOT NULL,
+    item_name text NOT NULL,
+    author character varying(255) NOT NULL,
+    comment text NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+ALTER TABLE ONLY base_filecomment
+    ADD CONSTRAINT base_filecomment_id_pkey PRIMARY KEY (id);
+CREATE INDEX base_filecomment_author ON base_filecomment USING btree (author);
+CREATE INDEX base_filecomment_repo_id ON base_filecomment USING btree (repo_id);
+CREATE INDEX base_filecomment_repo_id_parent_path_md5 ON base_filecomment USING btree (repo_id_parent_path_md5);
+
+
+CREATE SEQUENCE termsandconditions_termsandconditions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE termsandconditions_termsandconditions (
+    id integer DEFAULT nextval('termsandconditions_termsandconditions_id_seq'::regclass) NOT NULL,
+    slug character varying(50) NOT NULL,
+    name text NOT NULL,
+    version_number numeric(6,2) NOT NULL,
+    text text,
+    info text,
+    date_active timestamp without time zone,
+    date_created timestamp without time zone NOT NULL
+);
+ALTER TABLE ONLY termsandconditions_termsandconditions
+    ADD CONSTRAINT termsandconditions_termsandconditions_id_pkey PRIMARY KEY (id);
+CREATE INDEX termsandconditions_termsandconditions_slug ON termsandconditions_termsandconditions USING btree (slug);
+
+
+CREATE SEQUENCE termsandconditions_usertermsandconditions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE termsandconditions_usertermsandconditions (
+    id integer DEFAULT nextval('termsandconditions_usertermsandconditions_id_seq'::regclass) NOT NULL,
+    username character varying(255) NOT NULL,
+    ip_address character(39),
+    date_accepted timestamp without time zone NOT NULL,
+    terms_id integer NOT NULL
+);
+ALTER TABLE ONLY termsandconditions_usertermsandconditions
+    ADD CONSTRAINT termsandconditions_usertermsandconditions_id_pkey PRIMARY KEY (id);
+CREATE INDEX termsandconditions_usertermsandconditions_terms_id ON termsandconditions_usertermsandconditions USING btree (terms_id);
+CREATE UNIQUE INDEX termsandconditions_usertermsandconditions_username_terms_id ON termsandconditions_usertermsandconditions USING btree (username, terms_id);
+
+ALTER TABLE ONLY termsandconditions_usertermsandconditions
+    ADD CONSTRAINT termsandconditions_usertermsandconditions_terms_id_fkey FOREIGN KEY (terms_id) REFERENCES termsandconditions_termsandconditions(id);
+
+
+CREATE SEQUENCE two_factor_totpdevice_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE two_factor_totpdevice (
+    id integer DEFAULT nextval('two_factor_totpdevice_id_seq'::regclass) NOT NULL,
+    "user" character varying(255) NOT NULL,
+    name character varying(64) NOT NULL,
+    confirmed boolean NOT NULL,
+    key character varying(80) NOT NULL,
+    step integer NOT NULL,
+    t0 bigint NOT NULL,
+    digits integer NOT NULL,
+    tolerance integer NOT NULL,
+    drift smallint NOT NULL,
+    last_t bigint NOT NULL
+);
+ALTER TABLE ONLY two_factor_totpdevice
+    ADD CONSTRAINT two_factor_totpdevice_id_pkey PRIMARY KEY (id);
+CREATE UNIQUE INDEX two_factor_totpdevice_user ON two_factor_totpdevice USING btree ("user");
+
+
+CREATE SEQUENCE two_factor_phonedevice_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE two_factor_phonedevice (
+    id integer DEFAULT nextval('two_factor_phonedevice_id_seq'::regclass) NOT NULL,
+    "user" character varying(255) NOT NULL,
+    name character varying(64) NOT NULL,
+    confirmed boolean NOT NULL,
+    number character varying(40) NOT NULL,
+    key character varying(40) NOT NULL,
+    method character varying(4) NOT NULL
+);
+ALTER TABLE ONLY two_factor_phonedevice
+    ADD CONSTRAINT two_factor_phonedevice_id_pkey PRIMARY KEY (id);
+CREATE UNIQUE INDEX two_factor_phonedevice_user ON two_factor_phonedevice USING btree ("user");
+
+
+CREATE SEQUENCE two_factor_staticdevice_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE two_factor_staticdevice (
+    id integer DEFAULT nextval('two_factor_staticdevice_id_seq'::regclass) NOT NULL,
+    "user" character varying(255) NOT NULL,
+    name character varying(64) NOT NULL,
+    confirmed boolean NOT NULL
+);
+ALTER TABLE ONLY two_factor_staticdevice
+    ADD CONSTRAINT two_factor_staticdevice_id_pkey PRIMARY KEY (id);
+CREATE UNIQUE INDEX two_factor_staticdevice_user ON two_factor_staticdevice USING btree ("user");
+
+
+CREATE SEQUENCE two_factor_statictoken_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE two_factor_statictoken (
+    id integer DEFAULT nextval('two_factor_statictoken_id_seq'::regclass) NOT NULL,
+    token character varying(16) NOT NULL,
+    device_id integer NOT NULL
+);
+ALTER TABLE ONLY two_factor_statictoken
+    ADD CONSTRAINT two_factor_statictoken_id_pkey PRIMARY KEY (id);
+CREATE INDEX two_factor_statictoken_device_id ON two_factor_statictoken USING btree (device_id);
+CREATE INDEX two_factor_statictoken_token ON two_factor_statictoken USING btree (token);
+ALTER TABLE ONLY two_factor_statictoken
+    ADD CONSTRAINT two_factor_statictoken_device_id_fkey FOREIGN KEY (device_id) REFERENCES two_factor_staticdevice(id);
+
+
+CREATE SEQUENCE invitations_invitation_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE invitations_invitation (
+    id integer DEFAULT nextval('invitations_invitation_id_seq'::regclass) NOT NULL,
+    token character varying(40) NOT NULL,
+    inviter character varying(255) NOT NULL,
+    accepter character varying(255) NOT NULL,
+    invite_time timestamp without time zone NOT NULL,
+    accept_time timestamp without time zone,
+    invite_type character varying(20) NOT NULL,
+    expire_time timestamp without time zone NOT NULL
+);
+ALTER TABLE ONLY invitations_invitation
+    ADD CONSTRAINT invitations_invitation_id_pkey PRIMARY KEY (id);
+CREATE INDEX invitations_invitation_inviter ON invitations_invitation USING btree (inviter);
+CREATE INDEX invitations_invitation_token ON invitations_invitation USING btree (token);
+
+

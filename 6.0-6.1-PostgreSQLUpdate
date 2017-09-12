@@ -1,0 +1,135 @@
+ALTER TABLE share_fileshare ALTER token type varchar(100);
+ALTER TABLE share_fileshare ADD COLUMN permission varchar(50) NOT NULL DEFAULT 'view_download';
+ALTER TABLE share_uploadlinkshare ALTER token type varchar(100);
+
+--
+-- Name: institutions_institutionquota_id_seq; Type: SEQUENCE; Schema: public; Owner: seafile
+--
+
+CREATE SEQUENCE institutions_institutionquota_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.institutions_institutionquota_id_seq OWNER TO seafile;
+
+--
+-- Name: institutions_institutionquota; Type: TABLE; Schema: public; Owner: seafile; Tablespace:
+--
+
+CREATE TABLE institutions_institutionquota (
+    id integer DEFAULT nextval('institutions_institutionquota_id_seq'::regclass) NOT NULL,
+    quota bigint NOT NULL,
+    institution_id integer NOT NULL
+);
+
+
+ALTER TABLE public.institutions_institutionquota OWNER TO seafile;
+
+--
+-- Data for Name: institutions_institutionquota; Type: TABLE DATA; Schema: public; Owner: seafile
+--
+
+COPY institutions_institutionquota (id, quota, institution_id) FROM stdin;
+\.
+
+
+--
+-- Name: institutions_institutionquota_id_seq; Type: SEQUENCE SET; Schema: public; Owner: seafile
+--
+
+SELECT pg_catalog.setval('institutions_institutionquota_id_seq', 1, true);
+
+--
+-- Name: institutions_institutionquota_id_pkey; Type: CONSTRAINT; Schema: public; Owner: seafile; Tablespace:
+--
+
+ALTER TABLE ONLY institutions_institutionquota
+    ADD CONSTRAINT institutions_institutionquota_id_pkey PRIMARY KEY (id);
+
+--
+-- Name: institutions_institutionquota_institution_id; Type: INDEX; Schema: public; Owner: seafile; Tablespace:
+--
+
+CREATE INDEX institutions_institutionquota_institution_id ON institutions_institutionquota USING btree (institution_id);
+
+--
+-- Name: institutions_institutionquota_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: seafile
+--
+
+ALTER TABLE ONLY institutions_institutionquota
+    ADD CONSTRAINT institutions_institutionquota_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES institutions_institution(id);
+
+
+
+--
+-- Name: admin_log_adminlog_id_seq; Type: SEQUENCE; Schema: public; Owner: seafile
+--
+
+CREATE SEQUENCE admin_log_adminlog_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.admin_log_adminlog_id_seq OWNER TO seafile;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: admin_log_adminlog; Type: TABLE; Schema: public; Owner: seafile; Tablespace:
+--
+
+CREATE TABLE admin_log_adminlog (
+    id integer DEFAULT nextval('admin_log_adminlog_id_seq'::regclass) NOT NULL,
+    email character varying(254) NOT NULL,
+    operation character varying(255) NOT NULL,
+    detail text NOT NULL,
+    datetime timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.admin_log_adminlog OWNER TO seafile;
+
+--
+-- Data for Name: admin_log_adminlog; Type: TABLE DATA; Schema: public; Owner: seafile
+--
+
+COPY admin_log_adminlog (id, email, operation, detail, datetime) FROM stdin;
+\.
+
+
+--
+-- Name: admin_log_adminlog_id_seq; Type: SEQUENCE SET; Schema: public; Owner: seafile
+--
+
+SELECT pg_catalog.setval('admin_log_adminlog_id_seq', 1, true);
+
+--
+-- Name: admin_log_adminlog_id_pkey; Type: CONSTRAINT; Schema: public; Owner: seafile; Tablespace:
+--
+
+ALTER TABLE ONLY admin_log_adminlog
+    ADD CONSTRAINT admin_log_adminlog_id_pkey PRIMARY KEY (id);
+
+--
+-- Name: admin_log_adminlog_email; Type: INDEX; Schema: public; Owner: seafile; Tablespace:
+--
+
+CREATE INDEX admin_log_adminlog_email ON admin_log_adminlog USING btree (email);
+
+
+--
+-- Name: admin_log_adminlog_operation; Type: INDEX; Schema: public; Owner: seafile; Tablespace:
+--
+
+
+
+

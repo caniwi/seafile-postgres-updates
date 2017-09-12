@@ -1,0 +1,115 @@
+psql for 5.0 to 5.1 upgrade
+
+SEAFILE_DB
+
+alter table RepoTokenPeerInfo add client_ver varchar(20);
+
+
+
+SEAHUB_DB
+
+ALTER TABLE sysadmin_extra_userloginlog ALTER login_ip TYPE VARCHAR(128);
+
+CREATE TABLE IF NOT EXISTS post_office_attachment (
+ID BIGSERIAL NOT NULL PRIMARY KEY,
+file varchar(100) NOT NULL,
+name varchar(255) NOT NULL)
+;               
+
+
+CREATE TABLE IF NOT EXISTS "post_office_emailtemplate" (
+  "id" BIGSERIAL NOT NULL PRIMARY KEY,
+  "name" character varying(255) NOT NULL,
+  "description" text NOT NULL,
+  "subject" character varying(255) NOT NULL,
+  "content" text NOT NULL,
+  "html_content" text NOT NULL,
+  "created" timestamp without time zone NOT NULL,
+  "last_updated" timestamp without time zone NOT NULL,
+  "default_template_id" integer,
+  "language" character varying(12) NOT NULL
+)
+WITHOUT OIDS;
+CREATE UNIQUE INDEX "post_office_emailtemplate_language_default_template_id" ON "post_office_emailtemplate" ("language", "default_template_id");
+CREATE INDEX "post_office_emailtemplate_default_template_id" ON "post_office_emailtemplate" ("default_template_id");
+ALTER TABLE "post_office_emailtemplate" ADD FOREIGN KEY ("default_template_id")
+            REFERENCES "post_office_emailtemplate"(id);
+
+
+CREATE TABLE IF NOT EXISTS "post_office_email" (
+  "id" BIGSERIAL NOT NULL PRIMARY KEY,
+  "from_email" character varying(254) NOT NULL,
+  "to" text NOT NULL,
+  "cc" text NOT NULL,
+  "bcc" text NOT NULL,
+  "subject" character varying(255) NOT NULL,
+  "message" text NOT NULL,
+  "html_message" text NOT NULL,
+  "status" integer,
+  "priority" integer,
+  "created" timestamp without time zone NOT NULL,
+  "last_updated" timestamp without time zone NOT NULL,
+  "scheduled_time" timestamp without time zone,
+  "headers" text,
+  "context" text,
+  "template_id" integer,
+  "backend_alias" character varying(64) NOT NULL
+)
+WITHOUT OIDS;
+CREATE INDEX "post_office_email_status" ON "post_office_email" ("status");
+CREATE INDEX "post_office_email_created" ON "post_office_email" ("created");
+CREATE INDEX "post_office_email_last_updated" ON "post_office_email" ("last_updated");
+CREATE INDEX "post_office_email_scheduled_time" ON "post_office_email" ("scheduled_time");
+CREATE INDEX "post_office_email_template_id" ON "post_office_email" ("template_id");
+ALTER TABLE "post_office_email" ADD FOREIGN KEY ("template_id")
+            REFERENCES "post_office_emailtemplate"(id);
+
+
+CREATE TABLE IF NOT EXISTS "post_office_log" (
+  "id" BIGSERIAL NOT NULL PRIMARY KEY,
+  "date" timestamp without time zone NOT NULL,
+  "status" integer NOT NULL,
+  "exception_type" character varying(255) NOT NULL,
+  "message" text NOT NULL,
+  "email_id" integer NOT NULL
+)
+WITHOUT OIDS;
+CREATE INDEX "post_office_log_email_id" ON "post_office_log" ("email_id");
+ALTER TABLE "post_office_log" ADD FOREIGN KEY ("email_id")
+            REFERENCES "post_office_email"(id);
+
+CREATE TABLE IF NOT EXISTS "post_office_attachment_emails" (
+  "id" BIGSERIAL NOT NULL PRIMARY KEY,
+  "attachment_id" BIGINT NOT NULL,
+  "email_id" BIGINT NOT NULL
+)
+WITHOUT OIDS;
+CREATE UNIQUE INDEX "post_office_attachment_emails_attachment_id_email_id" ON "post_office_attachment_emails" ("attachment_id", "email_id");
+CREATE INDEX "post_office_attachment_emails_email_id" ON "post_office_attachment_emails" ("email_id");
+ALTER TABLE "post_office_attachment_emails" ADD FOREIGN KEY ("attachment_id")
+            REFERENCES "post_office_attachment"(id);
+ALTER TABLE "post_office_attachment_emails" ADD FOREIGN KEY ("email_id")
+            REFERENCES "post_office_email"(id);
+
+
+
+CREATE TABLE IF NOT EXISTS "institutions_institution" (
+  "id" BIGSERIAL NOT NULL PRIMARY KEY,
+  "name" character varying(200) NOT NULL,
+  "create_time" timestamp without time zone NOT NULL
+)
+WITHOUT OIDS;
+
+
+CREATE TABLE IF NOT EXISTS "institutions_institutionadmin" (
+  "id" BIGSERIAL NOT NULL PRIMARY KEY,
+  "user" character varying(254) NOT NULL,
+  "institution_id" integer NOT NULL
+)
+WITHOUT OIDS;
+CREATE INDEX "institutions_institutionadmin_institution_id" ON "institutions_institutionadmin" ("institution_id");
+ALTER TABLE "institutions_institutionadmin" ADD FOREIGN KEY ("institution_id")
+            REFERENCES "institutions_institution"(id);
+
+
+
