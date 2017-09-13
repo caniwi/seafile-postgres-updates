@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `share_orgfileshare` (
 ALTER TABLE `base_userstarredfiles` ADD INDEX `base_userstarredfiles_email` (email);
 create index base_userstarredfiles_email on base_userstarredfiles (email);
 
-PASSWD=ezai5Ier
+PASSWD=notanymore
 
 
 seafile@owncloud:~/seafile-server-4.1.2/upgrade/sql/4.1.0/mysql$ cat ccnet.sql
