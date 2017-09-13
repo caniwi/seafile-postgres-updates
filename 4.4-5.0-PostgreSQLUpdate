@@ -1,3 +1,6 @@
+SEAHUB_DB 
+
+
 CREATE TABLE IF NOT EXISTS `constance_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `key` varchar(255) NOT NULL,
